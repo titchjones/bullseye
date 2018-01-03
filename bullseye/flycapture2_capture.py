@@ -43,16 +43,16 @@ class Fc2Capture(BaseCapture):
         for prop in fc2.FRAME_RATE, fc2.SHUTTER, fc2.GAIN:
             self._set_feature(prop, auto_manual_mode=False, on_off=True,
                     abs_control=True)
-        self.ctx.set_video_mode_and_frame_rate(fc2.VIDEOMODE_1280x960Y8, 
-                fc2.FRAMERATE_7_5)
-        self.width = 1280
-        self.height = 960
+        # self.ctx.set_video_mode_and_frame_rate(fc2.VIDEOMODE_1280x960Y8,
+        #         fc2.FRAMERATE_7_5)
+        self.width = 1288
+        self.height = 964
         self.min_shutter = 1e-5
         self.max_shutter = .1
         self.add_trait("shutter", Range(
             self.min_shutter, self.max_shutter,
             self._get_feature(fc2.SHUTTER)/1000.))
-        self.max_framerate = 10
+        self.max_framerate = 100
         self.add_trait("framerate", Range(
             1, self.max_framerate,
             int(self._get_feature(fc2.FRAME_RATE))))

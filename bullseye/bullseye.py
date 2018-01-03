@@ -108,6 +108,9 @@ class Bullseye(HasTraits):
             Item("object.process.ignore",
                 tooltip="fraction of total intensity to ignore for "
                 "cropping, determines include radius"),
+            Item("object.process.crops",
+                tooltip="fraction of total intensity to ignore for "
+                "cropping, determines include radius"),
         ), HGroup(
             Item("object.process.active",
                 tooltip="capture and processing running"),

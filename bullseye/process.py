@@ -26,7 +26,26 @@ from threading import Thread
 
 from .special_sums import angle_sum, polar_sum
 from .capture import BaseCapture
+import zmq, time
 
+class zmqPublisher():
+    def __init__(self, *args, **kwargs):
+        # super(zmqPublisher, self).__init__()
+        self.context = zmq.Context()
+        self.connect(*args, **kwargs)
+        self.publisher = 'bullseye'
+
+    def connect(self, ipaddress='127.0.0.1', port=5556):
+        self.socket = self.context.socket(zmq.PUSH)
+        self.ipaddress = str(ipaddress)
+        self.port = str(port)
+        self.socket.connect("tcp://%s:%s" % (self.ipaddress, self.port))
+
+    def setIPAddress(self, ipaddress):
+        self.connect(ipaddress=ipaddress, port=self.port)
+
+    def emit(self, *args):
+        self.socket.send_pyobj(args)
 
 class Process(HasTraits):
     capture = Instance(BaseCapture)
@@ -35,7 +54,7 @@ class Process(HasTraits):
     active = Bool(False)
 
     track = Bool(False)
-    crops = Int(3) # crop iterations
+    crops = Range(3, 10, 3) # crop iterations
     rad = Float(3/2.) # crop radius in beam diameters
 
     background = Range(0., 1., 0.)
@@ -56,6 +75,8 @@ class Process(HasTraits):
 
     data = Dict()
     new_data = Event()
+
+    publisher = zmqPublisher()
 
     def initialize(self):
         self.capture.start()
@@ -137,7 +158,7 @@ class Process(HasTraits):
 
         px = self.capture.pixelsize
         l, b, w, h = self.capture.bounds
-        
+
         self.m00 = m00
         self.m20 = m20
         self.m02 = m02
@@ -240,6 +261,8 @@ class Process(HasTraits):
                 self.t, self.e,
                 self.black, self.peak, self.include_radius)
 
+        self.publisher.emit(fields)
+
         logging.info("beam: " + "% 6.4g,"*len(fields), *fields)
 
         self.text = (
@@ -304,5 +327,3 @@ class Process(HasTraits):
         logging.debug("stop")
         self.capture.stop()
         self.thread = None
-
-
